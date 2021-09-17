@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Libs\Processors;
+namespace App\Libs\Processors\Twitter;
 
-class CryptoEliz
+use App\Libs\Contracts\Interfaces\Processor;
+
+class CryptoEliz implements Processor
 {
     /**
      * Parse a text from a Tweet.
