@@ -6,6 +6,11 @@ use DateTime;
 use DateTimeZone;
 use App\Libs\Clients\Binance as Client;
 
+/**
+ * Binance Analyzer.
+ *
+ * Uses Binance API to analyze a symbol against a strategy, at a specific date-time.
+ */
 class Binance
 {
     /**
@@ -80,9 +85,8 @@ class Binance
             $entry = $klines[0][3];
         }
 
-        // Exits
-        $takeProfit = $entry * $this->takeProfit;
-        $stopLoss = $entry - (($entry * $this->stopLoss) - $entry);
+        $takeProfitValue = $entry * $this->takeProfit;
+        $stopLossValue = $entry - (($entry * $this->stopLoss) - $entry);
 
         $entry = [
             'symbol' => $symbol,
@@ -92,24 +96,26 @@ class Binance
             'low' => $klines[0][3],
             'close' => $klines[0][4],
             'entry' => $entry,
-            'take_profit' => $takeProfit,
-            'stop_loss' => $stopLoss,
+            'take_profit' => $takeProfitValue,
+            'stop_loss' => $stopLossValue,
+            'intervals' => '',
+            'result' => '',
         ];
 
-        // Simulate next 1k intervals
+        // Simulate
         $klines = $this->client->klines($symbolBinance, $this->interval, $dateStart, null, $this->limit);
         foreach ($klines as $i => $kline) {
 
             $entry['intervals'] = $i;
 
             // Stop loss reached?
-            if ($kline[3] <= $stopLoss) {
+            if ($kline[3] <= $stopLossValue) {
                 $entry['result'] = 'SL';
                 break;
             }
 
             // Take Profit reached?
-            if ($kline[2] >= $takeProfit) {
+            if ($kline[2] >= $takeProfitValue) {
                 $entry['result'] = 'TP';
                 break;
             }

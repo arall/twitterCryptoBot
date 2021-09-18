@@ -1,36 +1,61 @@
-<p align="center">
-    <img title="Laravel Zero" height="100" src="https://raw.githubusercontent.com/laravel-zero/docs/master/images/logo/laravel-zero-readme.png" />
-</p>
+# Twitter Crypto Bot
 
-<p align="center">
-  <a href="https://github.com/laravel-zero/framework/actions"><img src="https://img.shields.io/github/workflow/status/laravel-zero/framework/Tests.svg" alt="Build Status"></img></a>
-  <a href="https://packagist.org/packages/laravel-zero/framework"><img src="https://img.shields.io/packagist/dt/laravel-zero/framework.svg" alt="Total Downloads"></a>
-  <a href="https://packagist.org/packages/laravel-zero/framework"><img src="https://img.shields.io/packagist/v/laravel-zero/framework.svg?label=stable" alt="Latest Stable Version"></a>
-  <a href="https://packagist.org/packages/laravel-zero/framework"><img src="https://img.shields.io/packagist/l/laravel-zero/framework.svg" alt="License"></a>
-</p>
+The main purpose of the bot is to listen trading signals (mostly bump and dumps) in Twitter feeds and, as quick as possible, perform market operations.
 
-<h4> <center>This is a <bold>community project</bold> and not an official Laravel one </center></h4>
+However, it's built to easily adapt to listen for other channels, for example Telegram.
 
-Laravel Zero was created by, and is maintained by [Nuno Maduro](https://github.com/nunomaduro), and is a micro-framework that provides an elegant starting point for your console application. It is an **unofficial** and customized version of Laravel optimized for building command-line applications.
+The bot also contains commands to simulate past signals and generate statistics on the results. THis can be useful to tests different sources.
 
-- Built on top of the [Laravel](https://laravel.com) components.
-- Optional installation of Laravel [Eloquent](https://laravel-zero.com/docs/database/), Laravel [Logging](https://laravel-zero.com/docs/logging/) and many others.
-- Supports interactive [menus](https://laravel-zero.com/docs/build-interactive-menus/) and [desktop notifications](https://laravel-zero.com/docs/send-desktop-notifications/) on Linux, Windows & MacOS.
-- Ships with a [Scheduler](https://laravel-zero.com/docs/task-scheduling/) and  a [Standalone Compiler](https://laravel-zero.com/docs/build-a-standalone-application/).
-- Integration with [Collision](https://github.com/nunomaduro/collision) - Beautiful error reporting
+This bot is for my own personal use. I don't take any responsibility on your actions.
 
-------
+## Usage
 
-## Documentation
+First you will need a Twitter API credentials. You can obtain those at [Twitter Developer Portal](https://developer.twitter.com/en/portal/dashboard).
+Then, you will also need Binance API credentials. Those can be obtained at [Binance API management](https://www.binance.com/en/my/settings/api-management).
+Make sure the API key is allowed to perform market operations.
+You can also use [Binance Testnet API credentials](https://testnet.binance.vision/) to perform trades in a test environment.
 
-For full documentation, visit [laravel-zero.com](https://laravel-zero.com/).
+Those credentials need to be set in `.env` file. That file also contains other settings that need to be specified.
 
-## Support the development
-**Do you like this project? Support it by donating**
+* BINANCE_TEST: Use Binance Testnet (true) or real API (false)
+* BINANCE_PAIR: Pair to use (the USDT part of BTC/USDT, as some signals only specify the Crypto symbol)
+* BINANCE_INTERVAL: Candles interval
+* TAKE_PROFIT: Take Profit percentage
+* STOP_LOSS: Stop Loss percentage
 
-- PayPal: [Donate](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=66BYDWAT92N6L)
-- Patreon: [Donate](https://www.patreon.com/nunomaduro)
+### Check
 
-## License
+You can quickly check if all your APIs work by running:
+```
+php bot check
+```
 
-Laravel Zero is an open-source software licensed under the MIT license.
+### Twitter - Historical
+
+In order to simulate past signals from a Twitter feed:
+```
+php bot twitter:historical <twitter_username> <processor> <entry> <tweet_limit> <csv_path>
+```
+
+Where:
+* Twitter: Twitter username to read from.
+* Processor: Name of the Processor (Libs/Processors/Twitter/) class to use for extracting signals from the tweets.
+* Entry: The entry price of the first candle. High, Low or AVG. As candles are read using 1 minute intervals, we need to define the entry price in the candle when the signals was sent. Optional. Default AVG.
+* Tweet limit: Number of tweets to read. Optional. Default 500. 
+* CSV Path: Path to store a CSV table with all the results. Optional.
+
+For example:
+```
+php bot twitter:historical eliz883 cryptoeliz
+```
+
+### Twitter - Listen
+
+Listen for new Tweets and quickly perform trading operations.
+
+(TODO)
+
+
+## Class Structure
+* Processors: Extract signals from a given text.
+* Analyzers: Simulate a signal at a specific date-time, following a strategy.

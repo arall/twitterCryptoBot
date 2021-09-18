@@ -2,13 +2,54 @@
 
 namespace App\Libs\Clients;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
+use Spatie\TwitterStreamingApi\PublicStream;
 
+/**
+ * Twitter API Client.
+ */
 class Twitter
 {
+    /**
+     * API Bearer Token.
+     *
+     * @var string
+     */
     private $bearerToken;
 
-    const API = 'https://api.twitter.com/2/';
+    /**
+     * Access Key.
+     *
+     * @var string
+     */
+    private $accessKey;
+
+    /**
+     * Access Secret.
+     *
+     * @var string
+     */
+    private $accessSecret;
+
+    /**
+     * Consumer Key.
+     *
+     * @var string
+     */
+    private $consumerKey;
+
+    /**
+     * Consumer Secret.
+     *
+     * @var string
+     */
+    private $consumerSecret;
+
+    /**
+     * API URL.
+     */
+    const API = 'https://api.twitter.com/';
 
     /**
      * Constructor.
@@ -20,6 +61,22 @@ class Twitter
         $this->accessSecret = env('TWITTER_ACCESS_SECRET');
         $this->consumerKey = env('TWITTER_CONSUMER_KEY');
         $this->consumerSecret = env('TWITTER_CONSUMER_SECRET');
+
+        $this->generateBearerToken();
+    }
+
+    /**
+     * Obtain a bearer token.
+     */
+    private function generateBearerToken()
+    {
+        $response = Http::withBasicAuth($this->consumerKey, $this->consumerSecret)
+            ->asForm()
+            ->post(self::API . 'oauth2/token', [
+                'grant_type' => 'client_credentials',
+            ]);
+
+        $this->bearerToken = $response->json()['access_token'];
     }
 
     /**
@@ -29,15 +86,12 @@ class Twitter
      */
     public function checkAPI()
     {
-        $response = Http::withHeaders(['Authorization' => 'Bearer ' . $this->bearerToken])
-            ->get(self::API . 'users/' . $this->userId . '/tweets', [
-                'tweet.fields' => 'created_at',
-                'max_results' => 1,
-            ]);
-
-        if ($response->failed()) {
+        $response = $this->request('users/1101060631950696448/tweets');
+        if (!isset($response['data'])) {
             return false;
         }
+
+        // TODO: Check Access Tokens
 
         return true;
     }
@@ -55,24 +109,21 @@ class Twitter
 
         $current = 0;
         $max = $limit / 100;
-        $token = null;
+        $paginationToken = null;
         $tweets = [];
 
         do {
             $current++;
 
-            $response = Http::withHeaders(['Authorization' => 'Bearer ' . $this->bearerToken])
-                ->get(self::API . 'users/' . $userId . '/tweets', [
-                    'tweet.fields' => 'created_at',
-                    'max_results' => 100,
-                    'pagination_token' => $token,
-                ]);
+            $response = $this->request('users/' . $userId . '/tweets', [
+                'tweet.fields' => 'created_at',
+                'max_results' => 100,
+                'pagination_token' => $paginationToken,
+            ]);
 
-            $json = $response->json();
+            $paginationToken = $response['meta']['next_token'];
 
-            $token = $json['meta']['next_token'];
-
-            foreach ($json['data'] as $tweet) {
+            foreach ($response['data'] as $tweet) {
                 $tweets[] = $tweet;
             }
         } while ($current < $max);
@@ -88,11 +139,52 @@ class Twitter
      */
     public function getUserId($username)
     {
-        $response = Http::withHeaders(['Authorization' => 'Bearer ' . $this->bearerToken])
-            ->get(self::API . 'users/by', [
-                'usernames' => $username,
-            ]);
+        $response = $this->request('users/by', [
+            'usernames' => $username,
+        ]);
 
-        return $response->json()['data'][0]['id'];
+        return $response['data'][0]['id'];
+    }
+
+    /**
+     * Listen for Tweets.
+     *
+     * @param string $username
+     * @param  $function
+     */
+    public function listen($username, callable $function)
+    {
+        $userId = $this->getUserId($username);
+
+        $stream = PublicStream::create(
+            $this->accessKey,
+            $this->accessSecret,
+            $this->consumerKey,
+            $this->consumerSecret,
+        );
+
+        $stream->whenTweets($userId, $function)
+            ->startListening();
+    }
+
+    /**
+     * Perform an API request.
+     *
+     * @param string $endpoint
+     * @param array $data
+     * @return array
+     */
+    private function request($endpoint, $data = [])
+    {
+        $response = Http::withHeaders(['Authorization' => 'Bearer ' . $this->bearerToken])
+            ->get(self::API . '2/' . $endpoint, $data);
+
+        $json = $response->json();
+
+        if (isset($json['errors'])) {
+            throw new Exception($json['errors']);
+        }
+
+        return $json;
     }
 }

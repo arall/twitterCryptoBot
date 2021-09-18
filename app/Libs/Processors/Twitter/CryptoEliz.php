@@ -4,6 +4,11 @@ namespace App\Libs\Processors\Twitter;
 
 use App\Libs\Contracts\Interfaces\Processor;
 
+/**
+ * CryptoEliz Twitter Processor.
+ *
+ * https://twitter.com/eliz883
+ */
 class CryptoEliz implements Processor
 {
     /**

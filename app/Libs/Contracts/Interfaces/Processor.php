@@ -2,6 +2,11 @@
 
 namespace App\Libs\Contracts\Interfaces;
 
+/**
+ * Processor Interface.
+ *
+ * Extract signals from a given text.
+ */
 interface Processor
 {
     /**
