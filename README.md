@@ -47,7 +47,7 @@ Where:
 
 For example:
 ```
-php bot twitter:historical eliz883 cryptoeliz
+php bot twitter:historical eliz883 CryptoEliz
 ```
 
 ### Twitter - Listen
@@ -64,7 +64,7 @@ Where:
 
 For example:
 ```
-php bot twitter:historical eliz883 cryptoeliz
+php bot twitter:historical eliz883 CryptoEliz
 ```
 
 ### Test - Trade
