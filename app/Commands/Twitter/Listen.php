@@ -6,6 +6,7 @@ use App\Libs\Clients\Twitter;
 use App\Libs\Analyzers\Binance;
 use LaravelZero\Framework\Commands\Command;
 use Exception;
+use DateTime;
 
 class Listen extends Command
 {
@@ -80,12 +81,21 @@ class Listen extends Command
         $this->info('Listening live feed from ' . $this->twitterUser);
 
         $this->twitter->listen($this->twitterUser, function (array $tweet) {
+            // Ignore mentions, rts...
+            if ($tweet['user']['screen_name'] !== $this->twitterUser) {
+                return;
+            }
+
             # Weird, but seems to happen... may worth investigating
             if (!isset($tweet['created_at'])) {
                 return;
             }
 
             $this->info('New Tweet: ' . $tweet['text']);
+
+            $tweetDateTime = new DateTime($tweet['created_at']);
+            $currentDateTime = new DateTime('NOW');
+            $this->comment('Time: ' . $tweetDateTime->diff($currentDateTime)->format('%s') . ' seconds ago');
 
             $data = $this->processor::parse($tweet['text']);
             if (!$data) {
