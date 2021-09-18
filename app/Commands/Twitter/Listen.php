@@ -57,11 +57,13 @@ class Listen extends Command
     public function init()
     {
         $this->twitterUser = $this->argument('twitter');
+
         $processor = 'App\\Libs\\Processors\\Twitter\\' . $this->argument('processor');
         if (!class_exists($processor)) {
             throw new Exception('Twitter processor not found');
         }
         $this->processor = $processor;
+
         $this->twitter = new Twitter();
         $this->binance = new Binance();
     }
@@ -94,11 +96,26 @@ class Listen extends Command
             $this->comment('Signal detected! ' . $data['symbol']);
 
             $this->comment('Opening trade...');
-            $trade = $this->binance->trade($data['symbol']);
-            if (isset($trade['code']) && isset($trade['msg'])) {
-                $this->error('Error: ' . $trade['msg']);
-                return;
+
+            $response = $this->binance->buy('BTCUSDT', $data['symbol']);
+            $quantity = $response['executedQty'];
+
+            $avgEntryPrice = 0;
+            foreach ($response['fills'] as $fill) {
+                $avgEntryPrice += $fill['price'];
             }
+            $avgEntryPrice = $avgEntryPrice / count($response['fills']);
+
+            $this->comment('Bought ' . $quantity . ' at ' . $avgEntryPrice);
+
+            // Take Profit & Stop Loss order
+            $takeProfitPrice = $avgEntryPrice * getenv('TAKE_PROFIT');
+            $stopLossPrice = $avgEntryPrice - (($avgEntryPrice * getenv('STOP_LOSS')) - $avgEntryPrice);
+
+            $this->info('Take Profit Price: ' . $takeProfitPrice);
+            $this->info('Stop Loss Price: ' . $stopLossPrice);
+
+            $this->binance->sellWithStopLoss('BTCUSDT', $quantity, $takeProfitPrice, $stopLossPrice);
 
             $this->comment('Trade created!');
         });

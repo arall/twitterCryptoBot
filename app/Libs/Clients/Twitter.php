@@ -182,7 +182,7 @@ class Twitter
         $json = $response->json();
 
         if (isset($json['errors'])) {
-            throw new Exception($json['errors']);
+            throw new Exception('Twitter errors: ' . implode('. ' . $json['errors']));
         }
 
         return $json;

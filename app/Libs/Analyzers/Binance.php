@@ -85,8 +85,8 @@ class Binance
             $entry = $klines[0][3];
         }
 
-        $takeProfitValue = $entry * $this->takeProfit;
-        $stopLossValue = $entry - (($entry * $this->stopLoss) - $entry);
+        $takeProfitPrice = $entry * $this->takeProfit;
+        $stopLossPrice = $entry - (($entry * $this->stopLoss) - $entry);
 
         $entry = [
             'symbol' => $symbol,
@@ -96,8 +96,8 @@ class Binance
             'low' => $klines[0][3],
             'close' => $klines[0][4],
             'entry' => $entry,
-            'take_profit' => $takeProfitValue,
-            'stop_loss' => $stopLossValue,
+            'take_profit' => $takeProfitPrice,
+            'stop_loss' => $stopLossPrice,
             'intervals' => '',
             'result' => '',
         ];
@@ -109,13 +109,13 @@ class Binance
             $entry['intervals'] = $i;
 
             // Stop loss reached?
-            if ($kline[3] <= $stopLossValue) {
+            if ($kline[3] <= $stopLossPrice) {
                 $entry['result'] = 'SL';
                 break;
             }
 
             // Take Profit reached?
-            if ($kline[2] >= $takeProfitValue) {
+            if ($kline[2] >= $takeProfitPrice) {
                 $entry['result'] = 'TP';
                 break;
             }

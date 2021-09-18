@@ -19,6 +19,7 @@ Those credentials need to be set in `.env` file. That file also contains other s
 
 * BINANCE_TEST: Use Binance Testnet (true) or real API (false)
 * BINANCE_PAIR: Pair to use (the USDT part of BTC/USDT, as some signals only specify the Crypto symbol)
+* BINANCE_AMOUNT_PER_TRADE: Amount of Pair (USDT) to expend per each trade / signal. Keep in mind Binance minimum is 10$ - commissions, so at least set this to 15 to avoid issues.
 * BINANCE_INTERVAL: Candles interval
 * TAKE_PROFIT: Take Profit percentage
 * STOP_LOSS: Stop Loss percentage
@@ -53,8 +54,26 @@ php bot twitter:historical eliz883 cryptoeliz
 
 Listen for new Tweets and quickly perform trading operations.
 
-(TODO)
+```
+php bot twitter:listen <twitter_username> <processor>
+```
 
+Where:
+* Twitter: Twitter username to read from.
+* Processor: Name of the Processor (Libs/Processors/Twitter/) class to use for extracting signals from the tweets.
+
+For example:
+```
+php bot twitter:historical eliz883 cryptoeliz
+```
+
+### Test - Trade
+
+Performs a test trade on BTC/USDT.
+
+```
+php bot test:trade
+```
 
 ## Class Structure
 * Processors: Extract signals from a given text.

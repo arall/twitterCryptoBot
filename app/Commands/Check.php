@@ -36,7 +36,9 @@ class Check extends Command
             $this->error('Binance API failed.');
         } else {
             $this->info('Binance API OK');
-            $this->comment('Binance Available Balance in ' . getenv('BINANCE_PAIR') . ': ' . $binance->getPairBalance());
+            $this->comment('Binance Available Balance in ' .
+                getenv('BINANCE_PAIR') . ': ' .
+                $binance->getBalance(getenv('BINANCE_PAIR')));
         }
 
         if (!$twitter->checkAPI()) {
