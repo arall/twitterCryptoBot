@@ -7,6 +7,7 @@ use App\Libs\Analyzers\Binance;
 use LaravelZero\Framework\Commands\Command;
 use Exception;
 use DateTime;
+use Illuminate\Support\Facades\Log;
 
 class Listen extends Command
 {
@@ -80,6 +81,8 @@ class Listen extends Command
 
         $this->info('Listening live feed from ' . $this->twitterUser);
 
+        Log::notice('Listening started...');
+
         $this->twitter->listen($this->twitterUser, function (array $tweet) {
             // Weird, but seems to happen... may worth investigating
             if (!isset($tweet['user']) || !isset($tweet['created_at'])) {
@@ -104,6 +107,7 @@ class Listen extends Command
             }
 
             $this->comment('Signal detected! ' . $data['symbol']);
+            Log::notice('New signal: ' . $data['symbol']);
 
             $this->comment('Opening trade...');
 
@@ -117,6 +121,7 @@ class Listen extends Command
             $avgEntryPrice = $avgEntryPrice / count($response['fills']);
 
             $this->comment('Bought ' . $quantity . ' at ' . $avgEntryPrice);
+            Log::notice('Bought ' . $quantity . ' at ' . $avgEntryPrice);
 
             // Take Profit & Stop Loss order
             $takeProfitPrice = $avgEntryPrice * getenv('TAKE_PROFIT');
@@ -128,6 +133,8 @@ class Listen extends Command
             $this->binance->sellWithStopLoss('BTCUSDT', $quantity, $takeProfitPrice, $stopLossPrice);
 
             $this->comment('Trade created!');
+            Log::notice('Take Profit Price: ' . $takeProfitPrice);
+            Log::notice('Stop Loss Price: ' . $stopLossPrice);
         });
     }
 }
