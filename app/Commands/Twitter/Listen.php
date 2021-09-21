@@ -108,10 +108,11 @@ class Listen extends Command
 
             $this->comment('Signal detected! ' . $data['symbol']);
             Log::notice('New signal: ' . $data['symbol']);
+            $pair = strtoupper($data['symbol'] . getenv('BINANCE_PAIR'));
 
             $this->comment('Opening trade...');
 
-            $response = $this->binance->buy($data['symbol'] . getenv('BINANCE_PAIR'), getenv('BINANCE_AMOUNT_PER_TRADE'));
+            $response = $this->binance->buy($pair, getenv('BINANCE_AMOUNT_PER_TRADE'));
             $quantity = $response['executedQty'];
 
             $avgEntryPrice = 0;
@@ -130,7 +131,7 @@ class Listen extends Command
             $this->info('Take Profit Price: ' . $takeProfitPrice);
             $this->info('Stop Loss Price: ' . $stopLossPrice);
 
-            $this->binance->sellWithStopLoss('BTCUSDT', $quantity, $takeProfitPrice, $stopLossPrice);
+            $this->binance->sellWithStopLoss($pair, $quantity, $takeProfitPrice, $stopLossPrice);
 
             $this->comment('Trade created!');
             Log::notice('Take Profit Price: ' . $takeProfitPrice);
