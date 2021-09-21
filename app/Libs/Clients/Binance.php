@@ -180,7 +180,7 @@ class Binance
         // Check balance
         $balance = $this->getBalance($symbolInfo['quoteAsset']);
         if ($balance < $quoteQuantity) {
-            throw new Exception('Not enough ' . $symbolInfo['quoteAsset'] . ' balance: ' . $balance);
+            throw new Exception('Not enough ' . $symbolInfo['quoteAsset'] . ' balance: ' . $balance . ' < ' . $quoteQuantity);
         }
 
         // Check Min Trade Quantity

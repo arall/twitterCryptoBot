@@ -111,7 +111,7 @@ class Listen extends Command
 
             $this->comment('Opening trade...');
 
-            $response = $this->binance->buy('BTCUSDT', $data['symbol']);
+            $response = $this->binance->buy($data['symbol'] . getenv('BINANCE_PAIR'), getenv('BINANCE_AMOUNT_PER_TRADE'));
             $quantity = $response['executedQty'];
 
             $avgEntryPrice = 0;
