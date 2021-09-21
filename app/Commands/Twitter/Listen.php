@@ -3,7 +3,7 @@
 namespace App\Commands\Twitter;
 
 use App\Libs\Clients\Twitter;
-use App\Libs\Analyzers\Binance;
+use App\Libs\Clients\Binance;
 use LaravelZero\Framework\Commands\Command;
 use Exception;
 use DateTime;
