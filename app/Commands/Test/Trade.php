@@ -31,7 +31,7 @@ class Trade extends Command
         $binance = new Binance();
 
         // Buy BTC with USDT
-        $response = $binance->buy('BTCUSDT', getenv('BINANCE_AMOUNT_PER_TRADE'));
+        $response = $binance->buy('OMGBUSD', getenv('BINANCE_AMOUNT_PER_TRADE'));
 
         $quantity = $response['executedQty'];
 

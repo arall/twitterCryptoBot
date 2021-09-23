@@ -324,6 +324,8 @@ class Binance
                 return $info;
             }
         }
+
+        throw new Exception('Symbol not found ' . $symbol);
     }
 
     /**
