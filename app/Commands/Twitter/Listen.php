@@ -106,9 +106,10 @@ class Listen extends Command
                 return;
             }
 
-            $this->comment('Signal detected! ' . $data['symbol']);
-            Log::notice('New signal: ' . $data['symbol']);
-            $pair = strtoupper($data['symbol'] . getenv('BINANCE_PAIR'));
+            $symbol = $data['symbol'];
+            $this->comment('Signal detected! ' . $symbol);
+            Log::notice('New signal: ' . $symbol);
+            $pair = strtoupper($symbol . getenv('BINANCE_PAIR'));
 
             $this->comment('Opening trade...');
 
@@ -121,21 +122,21 @@ class Listen extends Command
             }
             $avgEntryPrice = $avgEntryPrice / count($response['fills']);
 
-            $this->comment('Bought ' . $quantity . ' at ' . $avgEntryPrice);
-            Log::notice('Bought ' . $quantity . ' at ' . $avgEntryPrice);
+            $this->comment('Bought ' . $quantity . ' ' . $symbol . ' at ' . $avgEntryPrice . ' ' . getenv('BINANCE_PAIR'));
+            Log::notice('Bought ' . $quantity . ' ' . $symbol . ' at ' . $avgEntryPrice . ' ' . getenv('BINANCE_PAIR'));
 
             // Take Profit & Stop Loss order
             $takeProfitPrice = $avgEntryPrice * getenv('TAKE_PROFIT');
             $stopLossPrice = $avgEntryPrice - (($avgEntryPrice * getenv('STOP_LOSS')) - $avgEntryPrice);
 
-            $this->info('Take Profit Price: ' . $takeProfitPrice);
-            $this->info('Stop Loss Price: ' . $stopLossPrice);
+            $this->info('Take Profit Price: ' . $takeProfitPrice . ' ' . $symbol);
+            $this->info('Stop Loss Price: ' . $stopLossPrice . ' ' . $symbol);
 
             $this->binance->sellWithStopLoss($pair, $quantity, $takeProfitPrice, $stopLossPrice);
 
             $this->comment('Trade created!');
-            Log::notice('Take Profit Price: ' . $takeProfitPrice);
-            Log::notice('Stop Loss Price: ' . $stopLossPrice);
+            Log::notice('Take Profit Price: ' . $takeProfitPrice . ' ' . $symbol);
+            Log::notice('Stop Loss Price: ' . $stopLossPrice . ' ' . $symbol);;
         });
     }
 }

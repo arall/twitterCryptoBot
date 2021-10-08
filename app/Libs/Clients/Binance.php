@@ -276,23 +276,34 @@ class Binance
     /**
      * Format a price based on Exchange Information.
      *
+     * Rounds num away from zero when it is half way there, making 1.5 into 2.
+     *
+     * @example 123.48 XMR will be formatted as 123.5
+     *
      * @param array $symbolInfo
      * @param float $value
      * @return float
      */
     private function formatPrice($symbolInfo, $value)
     {
+        // 0.10000000
         $minPrice = $this->getSymbolFilterValue($symbolInfo, 'PRICE_FILTER', 'minPrice') ?: 0.00000001;
 
+        // 1
         $precision = strlen(substr(strrchr(rtrim($minPrice, '0'), '.'), 1));
 
-        $value = round((($value / $minPrice) | 0) * $minPrice, $precision);
+        // 123.5
+        $value = round($value, $precision, PHP_ROUND_HALF_UP);
 
         return number_format($value, $precision, '.', '');
     }
 
     /**
      * Format a quantity based on Exchange Information.
+     *
+     * As this is using for creating trades based on the amount owned,
+     * it rounds num towards zero when it is half way there (making 1.5 into 1)
+     * to make sure there is always enough balance.
      *
      * @param array $symbolInfo
      * @param float $value
@@ -304,7 +315,7 @@ class Binance
 
         $precision = strlen(substr(strrchr(rtrim($stepSize, '0'), '.'), 1));
 
-        $value = round((($value / $stepSize) | 0) * $stepSize, $precision);
+        $value = round($value, $precision, PHP_ROUND_HALF_DOWN);
 
         return number_format($value, $precision, '.', '');
     }
