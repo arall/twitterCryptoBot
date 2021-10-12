@@ -17,6 +17,7 @@
     ],
     "require": {
         "php": "^7.3|^8.0",
+        "danog/madelineproto": "6.0.114.9998",
         "guzzlehttp/guzzle": "^6.5.5",
         "illuminate/http": "^8.0",
         "illuminate/log": "^8.0",

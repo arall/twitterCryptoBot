@@ -19,7 +19,7 @@ Those credentials need to be set in `.env` file. That file also contains other s
 
 * BINANCE_TEST: Use Binance Testnet (true) or real API (false)
 * BINANCE_PAIR: Pair to use (the USDT part of BTC/USDT, as some signals only specify the Crypto symbol)
-* BINANCE_AMOUNT_PER_TRADE: Amount of Pair (USDT) to expend per each trade / signal. Keep in mind Binance minimum is 10$ - commissions, so at least set this to 15 to avoid issues.
+* BINANCE_AMOUNT_PER_TRADE: Amount of Pair (USDT) to expend per each trade / signal. Keep in mind Binance minimum is 10$ - fees, so at least set this to 15 to avoid issues.
 * BINANCE_INTERVAL: Candles interval
 * TAKE_PROFIT: Take Profit percentage
 * STOP_LOSS: Stop Loss percentage

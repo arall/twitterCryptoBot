@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Commands\Twitter;
+namespace App\Commands\Telegram;
 
-use App\Libs\Clients\Twitter;
 use App\Libs\Analyzers\Binance;
+use App\Libs\Clients\Telegram;
 use LaravelZero\Framework\Commands\Command;
 use Exception;
 
@@ -14,7 +14,7 @@ class Historical extends Command
      *
      * @var string
      */
-    protected $signature = 'twitter:historical {twitter} {processor} {entry=avg : The entry price of the first candle. High, Low or AVG} {--limit=500} {--csv=}';
+    protected $signature = 'telegram:historical {group} {processor} {entry=avg : The entry price of the first candle. High, Low or AVG} {--limit=500} {--csv=}';
 
     /**
      * The description of the command.
@@ -24,11 +24,11 @@ class Historical extends Command
     protected $description = 'Perform a check on historical data';
 
     /**
-     * Twitter Client
+     * Telegram Client
      *
-     * @var App\Libs\Clients\Twitter
+     * @var App\Libs\Clients\Telegram
      */
-    private $twitter;
+    private $telegram;
 
     /**
      * Binance Analyzer
@@ -38,11 +38,11 @@ class Historical extends Command
     private $analyzer;
 
     /**
-     * Twitter user
+     * Telegram group
      *
      * @var string
      */
-    private $twitterUser;
+    private $telegramGroup;
 
     /**
      * Processor
@@ -92,13 +92,13 @@ class Historical extends Command
             throw new Exception('Invalid argument for entry. Use AVG, High or Low');
         }
 
-        $this->twitterUser = $this->argument('twitter');
-        $processor = 'App\\Libs\\Processors\\Twitter\\' . $this->argument('processor');
+        $this->telegramGroup = '-100' . $this->argument('group');
+        $processor = 'App\\Libs\\Processors\\Telegram\\' . $this->argument('processor');
         if (!class_exists($processor)) {
-            throw new Exception('Twitter processor not found');
+            throw new Exception('Telegram processor not found');
         }
         $this->processor = $processor;
-        $this->twitter = new Twitter();
+        $this->telegram = new Telegram();
         $this->analyzer = new Binance();
     }
 
@@ -132,20 +132,22 @@ class Historical extends Command
      */
     private function obtainSignals()
     {
-        $this->info('Obtaining last ' . $this->limit . ' Tweets...');
+        $this->info('Obtaining last ' . $this->limit . ' messages...');
 
-        $feed = $this->twitter->historical($this->twitterUser, $this->limit);
+        $messages = $this->telegram->historical($this->telegramGroup, $this->limit);
 
         $signals = [];
-        foreach ($feed as $tweet) {
-            $data = $this->processor::parse($tweet['text']);
+        foreach ($messages as $message) {
+            $data = $this->processor::parse($message['text']);
             if (!$data) {
                 continue;
             }
 
             $signals[] = [
                 'symbol' => $data['symbol'],
-                'date' => $tweet['created_at'],
+                'entryMinInDollars' => $data['entryMinInDollars'],
+                'entryMaxInDollars' => $data['entryMaxInDollars'],
+                'date' => $message['created_at'],
             ];
         }
 
