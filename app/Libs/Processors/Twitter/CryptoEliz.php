@@ -12,6 +12,14 @@ use App\Libs\Contracts\Interfaces\Processor;
 class CryptoEliz implements Processor
 {
     /**
+     * Regular expressions to match.
+     */
+    const REGEX = [
+        '/(#|\$)((\w|\d){3,5})\s+(👀|👁|🧐|☕️|↕️)($|\shttps:\/\/t\.co\/)/i',
+        '/(👀|👁|🧐|☕️|↕️)\s+(#|\$)((\w|\d){3,5})($|\shttps:\/\/t\.co\/)/i'
+    ];
+
+    /**
      * Parse a text from a Tweet.
      *
      * @param string $text
@@ -19,13 +27,11 @@ class CryptoEliz implements Processor
      */
     public static function parse(string $text)
     {
-        $regex = '/(#|\$)((\w|\d){3,5})\s+(👀|👁|🧐|☕️|↕️)($|\shttps:\/\/t\.co\/)/i';
-        preg_match_all($regex, $text, $matches);
-
-        if (empty($matches[0])) {
-            return;
+        foreach (self::REGEX as $regex) {
+            preg_match_all($regex, $text, $matches);
+            if (isset($matches[0]) && !empty($matches[0])) {
+                return ['symbol' => $matches[2][0]];
+            }
         }
-
-        return ['symbol' => $matches[2][0]];
     }
 }
